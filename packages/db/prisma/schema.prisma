@@ -17,14 +17,15 @@ model User {
   name     String   @db.VarChar(255)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
-  image    String   @db.VarChar(255)
+  image    String?   @db.VarChar(255)
   password String   @db.VarChar(255)
 
-  pins      Photo[]
+  photos     Photo[] @relation("photo")
   followers Follow[] @relation("FollowedBy")
   follows   Follow[] @relation("Following")
-  likes     Like[]
-  comments  Comment[]
+  likes     Like[] @relation("like")
+  comments  Comment[] @relation("comment")
+  saves     Save[] @relation("savephoto")
 }
 
 model Photo {
@@ -37,18 +38,28 @@ model Photo {
   updatedAt DateTime @default(now())
 
   userId String
-  user   User     @relation(fields: [userId], references: [username])
+  user   User   @relation(name:"photo",fields: [userId], references: [username])
 
-  likes     Like[]
-  comments  Comment[]
+  likes     Like[] @relation("like")
+  comments  Comment[] @relation("comment")
+  saves     Save[] @relation("savephoto")
+}
+model Save{
+  userId String
+  photoId String
+
+  user  User  @relation(name:"savephoto",fields: [userId], references: [username])
+  photo Photo @relation(name:"savephoto",fields: [photoId], references: [id])
+
+  @@id([userId, photoId])
 }
 
 model Like {
   userId String
   photoId String
 
-  user  User  @relation(fields: [userId], references: [username])
-  photo Photo @relation(fields: [photoId], references: [id])
+  user  User  @relation( name:"like",fields: [userId], references: [username])
+  photo Photo @relation( name:"like",fields: [photoId], references: [id])
 
   @@id([userId, photoId])
 }
@@ -72,6 +83,6 @@ model Comment {
   userId  String
   photoId String
 
-  user   User  @relation(fields: [userId], references: [username])
-  photo  Photo @relation(fields: [photoId], references: [id])
+  user   User  @relation(name:"comment",fields: [userId], references: [username])
+  photo  Photo @relation(name:"comment",fields: [photoId], references: [id])
 }
