@@ -12,3 +12,66 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+model User {
+  username String   @id @db.VarChar(255)
+  name     String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  image    String   @db.VarChar(255)
+  password String   @db.VarChar(255)
+
+  pins      Photo[]
+  followers Follow[] @relation("FollowedBy")
+  follows   Follow[] @relation("Following")
+  likes     Like[]
+  comments  Comment[]
+}
+
+model Photo {
+  id        String   @id @db.VarChar(255) @default(cuid())
+  media     String   @db.VarChar(255)
+  title     String
+  description String
+  tags      String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  userId String
+  user   User     @relation(fields: [userId], references: [username])
+
+  likes     Like[]
+  comments  Comment[]
+}
+
+model Like {
+  userId String
+  photoId String
+
+  user  User  @relation(fields: [userId], references: [username])
+  photo Photo @relation(fields: [photoId], references: [id])
+
+  @@id([userId, photoId])
+}
+
+model Follow {
+  followerId String
+  followingId String
+
+  follower User @relation("Following", fields: [followerId], references: [username])
+  following User @relation("FollowedBy", fields: [followingId], references: [username])
+
+  @@id([followerId, followingId])
+}
+
+model Comment {
+  id       String   @id @db.VarChar(255) @default(cuid())
+  content  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  userId  String
+  photoId String
+
+  user   User  @relation(fields: [userId], references: [username])
+  photo  Photo @relation(fields: [photoId], references: [id])
+}
