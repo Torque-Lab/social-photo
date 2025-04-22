@@ -33,8 +33,9 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     }
     // Find user
     const user = await prismaClient.user.findUnique({
-      where: { username: decoded.userId },
+      where: { id: decoded.userId },
       select: {
+        id: true,
         username: true,
         name: true,
         image: true,
@@ -47,7 +48,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     }
 
     // Attach user to request object
-    req.user = user.username;
+    req.user = user.id;
     next();
   } catch (error) {
     console.error('Authentication error:', error);

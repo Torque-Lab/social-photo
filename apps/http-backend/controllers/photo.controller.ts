@@ -44,7 +44,10 @@ export const createPhoto = async (req: Request, res: Response) => {
 
     // Upload file to S3
     const fileUrl = await uploadFile(req.file);
-
+    if(!req.user) {
+      res.status(400).json({ error: 'User not found' });
+      return;
+    }
     // Create photo record in database
     const photo = await prismaClient.photo.create({
       data: {

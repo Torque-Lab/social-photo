@@ -33,6 +33,10 @@ export const createComment = async (req: Request, res: Response) => {
        res.status(404).json({ error: 'Photo not found' });
        return;
     }
+    if(!photoId || !userId) {
+      res.status(400).json({ error: 'Invalid data' });
+      return;
+    }
 
     // Create comment
     const comment = await prismaClient.comment.create({

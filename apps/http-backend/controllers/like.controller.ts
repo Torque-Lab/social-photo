@@ -16,6 +16,10 @@ export const likePhoto = async (req: Request, res: Response): Promise<void> => {
       res.status(404).json({ error: 'Photo not found' });
       return;
     }
+    if(!photoId || !userId) {
+      res.status(400).json({ error: 'Invalid data' });
+      return;
+    }
 
     // Check if already liked
     const existingLike = await prismaClient.like.findUnique({
@@ -53,7 +57,10 @@ export const unlikePhoto = async (req: Request, res: Response): Promise<void> =>
   try {
     const { photoId } = req.params;
     const userId = req.user;
-
+    if(!photoId || !userId) {
+      res.status(400).json({ error: 'Invalid data' });
+      return;
+    }
     // Check if like exists
     const existingLike = await prismaClient.like.findUnique({
       where: {
@@ -92,7 +99,10 @@ export const checkLike = async (req: Request, res: Response): Promise<void> => {
   try {
     const { photoId } = req.params;
     const userId = req.user;
-
+    if(!photoId || !userId) {
+      res.status(400).json({ error: 'Invalid data' });
+      return;
+    }
     // Check if like exists
     const existingLike = await prismaClient.like.findUnique({
       where: {

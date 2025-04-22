@@ -22,7 +22,10 @@ export const followUser = async (req: Request, res: Response): Promise<void> => 
       res.status(404).json({ error: 'User not found' });
       return;
     }
-
+    if(!username || !followerId) {
+      res.status(400).json({ error: 'Invalid data' });
+      return;
+    }
     // Check if already following
     const existingFollow = await prismaClient.follow.findUnique({
       where: {
@@ -59,7 +62,10 @@ export const unfollowUser = async (req: Request, res: Response) => {
   try {
     const { username } = req.params;
     const followerId = req.user;
-
+    if(!username || !followerId) {
+      res.status(400).json({ error: 'Invalid data' });
+      return;
+    }
     // Check if follow relationship exists
     const existingFollow = await prismaClient.follow.findUnique({
       where: {
@@ -98,6 +104,11 @@ export const checkFollow = async (req: Request, res: Response) : Promise<void> =
   try {
     const { username } = req.params;
     const followerId = req.user;
+
+    if(!username || !followerId) {
+      res.status(400).json({ error: 'Invalid data' });
+      return;
+    }
 
     // Check if follow relationship exists
     const existingFollow = await prismaClient.follow.findUnique({

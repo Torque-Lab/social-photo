@@ -16,6 +16,10 @@ export const savePhoto = async (req: Request, res: Response): Promise<void> => {
        res.status(404).json({ error: 'Photo not found' });
        return;
     }
+    if(!photoId || !userId) {
+      res.status(400).json({ error: 'Invalid data' });
+      return;
+    }
 
     // Check if already saved
     const existingSave = await prismaClient.save.findUnique({
@@ -54,7 +58,12 @@ export const unsavePhoto = async (req: Request, res: Response): Promise<void> =>
     const { photoId } = req.params;
     const userId = req.user;
 
-    // Check if save exists
+    if(!photoId || !userId) {
+      res.status(400).json({ error: 'Invalid data' });
+      return;
+    }
+
+      // Check if save exists
     const existingSave = await prismaClient.save.findUnique({
       where: {
         userId_photoId: {
@@ -92,6 +101,11 @@ export const checkSave = async (req: Request, res: Response): Promise<void>  => 
   try {
     const { photoId } = req.params;
     const userId = req.user;
+
+    if(!photoId || !userId) {
+      res.status(400).json({ error: 'Invalid data' });
+      return;
+    }
 
     // Check if save exists
     const existingSave = await prismaClient.save.findUnique({

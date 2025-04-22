@@ -12,12 +12,12 @@ dotenv.config();
 
 export const signUp = async (req: Request, res: Response) => {
     try {
-       const parsedData = SignUpSchema.parse(req.body);
-       if(!parsedData) {
+       const parsedData = SignUpSchema.safeParse(req.body);
+       if(!parsedData.success) {
          res.status(400).json({ error: "Invalid data" });
          return;
        }
-       const { username, password, name, image } = parsedData;
+       const { username, password, name, image } = parsedData.data;
        const hashedPassword = await hashPassword(password);
        const user = await prismaClient.user.create({
         data: {
@@ -35,15 +35,15 @@ export const signUp = async (req: Request, res: Response) => {
 
 export const signIn = async (req: Request, res: Response) => {
     try {
-        const parsedData = SignInSchema.parse(req.body);
-        if(!parsedData) {
+        const parsedData = SignInSchema.safeParse(req.body);
+        if(!parsedData.success) {
             res.status(400).json({ error: "Invalid data" });
             return;
         }
-        const { username, password } = parsedData;
+        const { username, password } = parsedData.data;
         const user = await prismaClient.user.findUnique({
             where: {
-                username
+                username: username
             }
         });
         if(!user) {
@@ -55,7 +55,7 @@ export const signIn = async (req: Request, res: Response) => {
             res.status(401).json({ error: "Invalid password" });
             return;
         }
-        const token = jwt.sign({ userId: username }, process.env.JWT_SECRET!,{ expiresIn: '4h' });
+        const token = jwt.sign({ userId: user.id}, process.env.JWT_SECRET!,{ expiresIn: '4h' });
         res.status(200).json({ token });
     } catch (error) {
        handleError(res, error, "Failed to sign in");
