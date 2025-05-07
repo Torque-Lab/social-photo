@@ -1,5 +1,4 @@
 import express from 'express';
-import { authenticate } from '../middleware/auth.middleware';
 import { signUp, signIn, resetPassword, forgotPassword } from '../controllers/auth.controller';
 
 

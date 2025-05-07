@@ -1,17 +1,13 @@
 import api from './api';
 
 const LikeService = {
-  /**
-   * Like a photo
-   */
+
   likePhoto: async (photoId: string) => {
     const response = await api.post(`/api/likes/${photoId}`);
     return response.data;
   },
 
-  /**
-   * Unlike a photo
-   */
+ 
   unlikePhoto: async (photoId: string) => {
     const response = await api.delete(`/api/likes/${photoId}`);
     return response.data;

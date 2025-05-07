@@ -11,6 +11,7 @@ declare global {
   namespace Express {
     interface Request {
       file?: Express.Multer.File;
+      user?: string; // Make user optional to match existing declarations
     }
   }
 }
@@ -95,10 +96,18 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
 // Update user profile image
 export const updateUserImage = async (req: Request, res: Response): Promise<void> => {
   try {
-    if (!req.file) {
-      res.status(400).json({ error: 'No image uploaded' });
+    // Validate the request body
+    const imageUrlSchema = z.object({
+      imageUrl: z.string().url()
+    });
+    
+    const validation = imageUrlSchema.safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({ error: 'Valid image URL is required' });
       return;
     }
+    
+    const { imageUrl } = validation.data;
 
     // Get current user to check if they have an existing image
     const currentUser = await prismaClient.user.findUnique({
@@ -109,18 +118,10 @@ export const updateUserImage = async (req: Request, res: Response): Promise<void
     // Delete old image from S3 if it exists
     if (currentUser?.image) {
       // Extract the filename from the URL
-      const imageUrl = currentUser.image;
-      const fileName = imageUrl.split('/').pop() || '';
+      const oldImageUrl = currentUser.image;
+      const fileName = oldImageUrl.split('/').pop() || '';
       await deleteFile(fileName);
     }
-
-    // Upload new image to S3
-    const fileName = await uploadFile(req.file);
-    
-    // Construct the full URL for storage in the database
-    const bucketName = process.env.AWS_BUCKET_NAME || '';
-    const region = process.env.AWS_REGION || 'us-east-1';
-    const imageUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${fileName}`;
 
     // Update user with new image URL
     const updatedUser = await prismaClient.user.update({

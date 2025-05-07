@@ -8,6 +8,7 @@ const createPhotoSchema = z.object({
   title: z.string().min(1).max(100),
   description: z.string().min(1).max(500),
   tags: z.array(z.string()),
+  imageUrl: z.string().url().optional(),
 });
 
 const updatePhotoSchema = z.object({
@@ -19,11 +20,6 @@ const updatePhotoSchema = z.object({
 // Create a new photo
 export const createPhoto = async (req: Request, res: Response) => {
   try {
-    if (!req.file) {
-      res.status(400).json({ error: 'No photo uploaded' });
-      return;
-    }
-
     // Validate request body
     const validation = createPhotoSchema.safeParse(req.body);
     if (!validation.success) {
@@ -42,16 +38,21 @@ export const createPhoto = async (req: Request, res: Response) => {
       }
     }
 
-    // Upload file to S3
-    const fileUrl = await uploadFile(req.file);
+    // Check for the URL of the uploaded image
+    if (!req.body.imageUrl) {
+      res.status(400).json({ error: 'No image URL provided' });
+      return;
+    }
+
     if(!req.user) {
       res.status(400).json({ error: 'User not found' });
       return;
     }
+    
     // Create photo record in database
     const photo = await prismaClient.photo.create({
       data: {
-        url: fileUrl,
+        url: req.body.imageUrl,
         title: validation.data.title,
         description: validation.data.description,
         tags,

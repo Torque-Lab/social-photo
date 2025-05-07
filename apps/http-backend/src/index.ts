@@ -9,6 +9,7 @@ import likeRoutes from '../routes/like.routes';
 import commentRoutes from '../routes/comment.routes';
 import saveRoutes from '../routes/save.routes';
 import followRoutes from '../routes/follow.routes';
+import uploadRoutes from '../routes/upload.routes';
 
 // Initialize environment variables
 dotenv.config(); 
@@ -29,6 +30,7 @@ app.use('/api/likes', likeRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/saves', saveRoutes);
 app.use('/api/follows', followRoutes);
+app.use('/api/uploads', uploadRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {
